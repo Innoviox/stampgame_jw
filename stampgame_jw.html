@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stamp Selector</title>
+  <style>
+  #canvas {
+    position: relative;
+    width: 850px;
+    height: 600px;
+    border: 1px solid white;
+  }
+  .newCanvas{
+    width: 850px;
+    height: 600px;
+    border: 1px solid white;
+  }
+  .stamp {
+    width: 28px;
+    height: 28px;
+    margin: 15px;
+  }
+  .stamp-image {
+    width: 28px;
+    height: 28px;
+  }
+  .button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 5px 5px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+  #stamp-panel {
+    margin-bottom: 10px;
+  }
+  </style>
+</head>
+<body style="background-color:black;">
+  <div>
+    <button id="show-random-btn">Show Prompt (random)</button>
+    <label for="subject-id" style="color:white;">Subject ID:</label>
+    <input type="text" id="subject-id">
+    <label for="subject-age" style="color:white;">Subject Age:</label>
+    <input type="text" id="subject-age">
+    <label for="gender" style="color:white;">Gender:</label>
+    <input type="text" id="gender">
+    <button id="show-btn" class="button">Touch the Center (new image)!</button>
+<div>
+    <label for="good" style="color:white;">Good job? (yes/no)</label>
+    <input type="text" id="good">
+    <div id="picture-container">
+  <img src="eachisblue.png" id="picture1" style="display: none;" height="25">
+  <img src="everyisblue.png" id="picture2" style="display: none;" height="25">
+</div>
+
+  </div>
+  <div id="canvas" style="background-color: black;"></div>
+  <div id="stamp-panel">
+    <img class="stamp" src="bc.png">
+    <img class="stamp" src="bt.png">
+    <img class="stamp" src="bs.png">
+    <img class="stamp" src="rc.png">
+    <img class="stamp" src="rt.png">
+    <img class="stamp" src="rs.png">
+    <img class="stamp" src="yc.png">
+    <img class="stamp" src="yt.png">
+    <img class="stamp" src="ys.png">
+    <button id="clear-btn" style="float: right;">Clear Screen</button>
+  </div>
+
+
+  <script>
+  const canvas = document.getElementById("canvas");
+  const clearBtn = document.getElementById("clear-btn");
+  const submitBtn = document.getElementById("submit-btn");
+  const showBtn = document.getElementById("show-btn");
+  const subjectId = document.getElementById("subject-id");
+  const newCanvas = new Image(996, 650);
+  newCanvas.src = "touchcenter.png";
+  const blankCanvas = new Image(996, 650);
+  blankCanvas.src = "blankcanvas.png";
+
+  const pictureContainer = document.getElementById("picture-container");
+  const picture1 = document.getElementById("picture1");
+  const picture2 = document.getElementById("picture2");
+  const showRandomBtn = document.getElementById("show-random-btn");
+
+  // add click event listener to show random button
+  showRandomBtn.addEventListener("click", function() {
+    // generate random number between 1 and 2
+    const randomNum = Math.floor(Math.random() * 2) + 1;
+
+    // hide both pictures
+    picture1.style.display = "none";
+    picture2.style.display = "none";
+
+    // show the picture corresponding to the random number
+    if (randomNum === 1) {
+      picture1.style.display = "block";
+    } else {
+      picture2.style.display = "block";
+    }
+  });
+
+  let isDragging = false;
+  let activeStamp = null;
+
+  function addStamp(event) {
+    const stamp = new Image();
+    stamp.src = event.target.src;
+    stamp.classList.add("stamp-image");
+    stamp.style.position = "absolute";
+    stamp.style.top = `${event.clientY - canvas.offsetTop}px`;
+    stamp.style.left = `${event.clientX - canvas.offsetLeft}px`;
+    canvas.appendChild(stamp);
+    activeStamp = stamp;
+    isDragging = true;
+  }
+
+  function moveStamp(event) {
+    if (!isDragging) return;
+    activeStamp.style.top = `${event.clientY - canvas.offsetTop}px`;
+    activeStamp.style.left = `${event.clientX - canvas.offsetLeft}px`;
+  }
+
+  function releaseStamp() {
+    isDragging = false;
+    activeStamp = null;
+  }
+
+  function clearCanvas() {
+    while (canvas.firstChild) {
+      canvas.removeChild(canvas.firstChild);
+    }
+  }
+
+  function showCanvas() {
+      canvas.appendChild(newCanvas);
+      setTimeout(function() {
+        canvas.removeChild(canvas.firstChild);
+        canvas.appendChild(blankCanvas);
+}, 2000);
+canvas.addEventListener("click", function(event) {
+const cross = new Image(10,10);
+cross.src = "cross.png";
+cross.style.position = "absolute";
+cross.style.top = `${event.clientY - canvas.offsetTop - 5}px`;
+cross.style.left = `${event.clientX - canvas.offsetLeft - 5}px`;
+canvas.appendChild(cross);
+});
+    }
+
+
+
+  function submitCanvas() {
+
+}
+
+
+
+  canvas.addEventListener("mousedown", releaseStamp);
+  canvas.addEventListener("mousemove", moveStamp);
+  canvas.addEventListener("mouseup", releaseStamp);
+
+  const stamps = document.getElementsByClassName("stamp");
+  for (let stamp of stamps) {
+    stamp.addEventListener("click", addStamp);
+  }
+
+  clearBtn.addEventListener("click", clearCanvas);
+  //submitBtn.addEventListener("click", submitCanvas);
+  showBtn.addEventListener("click", showCanvas);
+
+  </script>
+</body>
+</html>
