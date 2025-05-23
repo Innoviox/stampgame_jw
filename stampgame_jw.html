@@ -49,6 +49,8 @@
     <label for="gender" style="color:white;">Gender:</label>
     <input type="text" id="gender">
     <button id="show-btn" class="button">Touch the Center (new image)!</button>
+    <button id="undo-btn" class="button" onClick="undoStamp()">Undo</button>
+    <button id="export-btn" class="button" onClick="exportShapes()">Export</button>
 <div>
     <label for="good" style="color:white;">Good job? (yes/no)</label>
     <input type="text" id="good">
@@ -89,6 +91,8 @@
   const picture2 = document.getElementById("picture2");
   const showRandomBtn = document.getElementById("show-random-btn");
 
+  const shapes = [];
+
   // add click event listener to show random button
   showRandomBtn.addEventListener("click", function() {
     // generate random number between 1 and 2
@@ -121,13 +125,68 @@
     isDragging = true;
   }
 
+  function undoStamp() {
+    if (shapes.length > 0) {
+      const lastStamp = shapes.pop();
+      canvas.removeChild(lastStamp);
+    }
+  }
+
+  function exportShapes() {
+    const shapeData = shapes.map(shape => {
+      return {
+        src: shape.src,
+        top: shape.style.top,
+        left: shape.style.left
+      };
+    });
+    const json = JSON.stringify(shapeData);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "shapes.json";
+    a.click();
+  }
+
   function moveStamp(event) {
     if (!isDragging) return;
     activeStamp.style.top = `${event.clientY - canvas.offsetTop}px`;
     activeStamp.style.left = `${event.clientX - canvas.offsetLeft}px`;
   }
 
+  function getStampPosition(stamp) {
+    const top = parseInt(stamp.style.top);
+    const left = parseInt(stamp.style.left);
+    const rect = stamp.getBoundingClientRect();
+    return { top, left, rect };
+  }
+
+  function overlapping(stamp1, stamp2) {
+    let { top: top1, left: left1, rect: rect1 } = getStampPosition(stamp1);
+    let { top: top2, left: left2, rect: rect2 } = getStampPosition(stamp2);
+
+    if (left1 > left2 + rect2.width || left1 + rect1.width < left2) {
+      return false;
+    }
+
+    if (top1 > top2 + rect2.height || top1 + rect1.height < top2) {
+      return false;
+    }
+
+    return true;
+  }
+
   function releaseStamp() {
+    for (let shape of shapes) {
+      if (overlapping(activeStamp, shape)) {
+        canvas.removeChild(activeStamp);
+        isDragging = false;
+        activeStamp = null;
+        return;
+      }
+    }
+    shapes.push(activeStamp);
     isDragging = false;
     activeStamp = null;
   }
