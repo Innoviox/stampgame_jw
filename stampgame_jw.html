@@ -91,7 +91,7 @@
   const picture2 = document.getElementById("picture2");
   const showRandomBtn = document.getElementById("show-random-btn");
 
-  const shapes = [];
+  let shapes = [];
 
   // add click event listener to show random button
   showRandomBtn.addEventListener("click", function() {
@@ -133,19 +133,23 @@
   }
 
   function exportShapes() {
-    const shapeData = shapes.map(shape => {
-      return {
-        src: shape.src,
-        top: shape.style.top,
-        left: shape.style.left
-      };
-    });
-    const json = JSON.stringify(shapeData);
-    const blob = new Blob([json], { type: "application/json" });
+    const subjectId = document.getElementById("subject-id").value.trim();
+    const subjectAge = document.getElementById("subject-age").value.trim();
+    const subjectGender = document.getElementById("gender").value.trim();
+    
+    const csvHeader = "Subject ID,Subject Age,Gender,Shape File Source,Top,Left\n";
+    
+    const csvRows = shapes.map(shape => {
+      return `"${subjectId}","${subjectAge}","${subjectGender}","${shape.src}","${shape.style.top}","${shape.style.left}"`;
+    }).join("\n");
+    
+    const csvContent = csvHeader + csvRows;
+    
+    const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "shapes.json";
+    a.download = `shapes-${subjectId}-${subjectAge}-${subjectGender}.csv`;
     a.click();
   }
 
@@ -180,18 +184,17 @@
   function releaseStamp() {
     for (let shape of shapes) {
       if (overlapping(activeStamp, shape)) {
-        canvas.removeChild(activeStamp);
-        isDragging = false;
-        activeStamp = null;
         return;
       }
     }
+
     shapes.push(activeStamp);
     isDragging = false;
     activeStamp = null;
   }
 
   function clearCanvas() {
+    shapes = [];
     while (canvas.firstChild) {
       canvas.removeChild(canvas.firstChild);
     }
