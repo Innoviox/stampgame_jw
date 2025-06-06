@@ -48,11 +48,11 @@
     <input type="text" id="subject-age">
     <label for="gender" style="color:white;">Gender:</label>
     <input type="text" id="gender">
-    <button id="show-btn" class="button">Touch the Center (new image)!</button>
+    <button id="show-btn" class="button">Touch the Center!</button>
     <button id="undo-btn" class="button" onClick="undoStamp()">Undo</button>
     <button id="export-btn" class="button" onClick="exportShapes()">Export</button>
 <div>
-    <label for="good" style="color:white;">Good job? (yes/no)</label>
+    <label for="good" style="color:white;">Estimation</label>
     <input type="text" id="good">
     <div id="picture-container">
   <img src="eachisblue.png" id="picture1" style="display: none;" height="25">
@@ -92,6 +92,7 @@
   const showRandomBtn = document.getElementById("show-random-btn");
 
   let shapes = [];
+  let crossPosition = null;
 
   // add click event listener to show random button
   showRandomBtn.addEventListener("click", function() {
@@ -114,6 +115,11 @@
   let activeStamp = null;
 
   function addStamp(event) {
+    if (activeStamp != null)
+    {
+      return;
+    }
+
     const stamp = new Image();
     stamp.src = event.target.src;
     stamp.classList.add("stamp-image");
@@ -136,11 +142,15 @@
     const subjectId = document.getElementById("subject-id").value.trim();
     const subjectAge = document.getElementById("subject-age").value.trim();
     const subjectGender = document.getElementById("gender").value.trim();
+    const estimation = document.getElementById("good").value.trim();
     
-    const csvHeader = "Subject ID,Subject Age,Gender,Shape File Source,Top,Left\n";
+    const csvHeader = "Subject ID,Subject Age,Gender,Estimation,Shape File Source,Top,Left,CenterTop,CenterLeft\n";
     
     const csvRows = shapes.map(shape => {
-      return `"${subjectId}","${subjectAge}","${subjectGender}","${shape.src}","${shape.style.top}","${shape.style.left}"`;
+      let row=`"${subjectId}","${subjectAge}","${subjectGender}","${estimation}",`;
+      row += `"${shape.src}","${shape.style.top}","${shape.style.left}",`;
+      row += `"${crossPosition ? crossPosition.y : ''}","${crossPosition ? crossPosition.x : ''}"\n`;
+      return row;
     }).join("\n");
     
     const csvContent = csvHeader + csvRows;
@@ -182,6 +192,17 @@
   }
 
   function releaseStamp() {
+    if (!activeStamp) {
+      return;
+    }
+
+    const top = parseInt(activeStamp.style.top);
+    const left = parseInt(activeStamp.style.left);
+
+    if (top > 600 || left > 850 || top < 0 || left < 0) {
+      return; // don't add stamp if it's out of bounds
+    }
+    
     for (let shape of shapes) {
       if (overlapping(activeStamp, shape)) {
         return;
@@ -198,29 +219,34 @@
     while (canvas.firstChild) {
       canvas.removeChild(canvas.firstChild);
     }
+
+    canvas.removeEventListener("click", addCross);
   }
 
   function showCanvas() {
-      canvas.appendChild(newCanvas);
-      setTimeout(function() {
+      while (canvas.firstChild) {
         canvas.removeChild(canvas.firstChild);
-        canvas.appendChild(blankCanvas);
-}, 2000);
-canvas.addEventListener("click", function(event) {
-const cross = new Image(10,10);
-cross.src = "cross.png";
-cross.style.position = "absolute";
-cross.style.top = `${event.clientY - canvas.offsetTop - 5}px`;
-cross.style.left = `${event.clientX - canvas.offsetLeft - 5}px`;
-canvas.appendChild(cross);
-});
-    }
+      }
 
+      canvas.appendChild(blankCanvas);
+
+      canvas.addEventListener("click", addCross);
+    }
 
 
   function submitCanvas() {
 
 }
+
+  function addCross() {
+    const cross = new Image(10,10);
+    cross.src = "cross.png";
+    cross.style.position = "absolute";
+    cross.style.top = `${event.clientY - canvas.offsetTop - 5}px`;
+    cross.style.left = `${event.clientX - canvas.offsetLeft - 5}px`;
+    canvas.appendChild(cross);
+    crossPosition = { y: parseInt(cross.style.top), x: parseInt(cross.style.left) };
+  }
 
 
 
