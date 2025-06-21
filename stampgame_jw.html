@@ -5,23 +5,23 @@
   <style>
   #canvas {
     position: relative;
-    width: 850px;
-    height: 600px;
+    width: 830px;
+    height: 580px;
     border: 1px solid white;
   }
   .newCanvas{
-    width: 850px;
-    height: 600px;
+    width: 830ps;
+    height: 580px;
     border: 1px solid white;
   }
   .stamp {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     margin: 15px;
   }
   .stamp-image {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
   }
   .button {
   background-color: #4CAF50; /* Green */
@@ -36,6 +36,18 @@
 }
   #stamp-panel {
     margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  #undo-btn {
+    width: 75px;
+    height: 40px;
+    margin-left: 50px;
+  }
+  #stamps {
+    display: flex;
+    align-items: center;
   }
   </style>
 </head>
@@ -49,7 +61,7 @@
     <label for="gender" style="color:white;">Gender:</label>
     <input type="text" id="gender">
     <button id="show-btn" class="button">Touch the Center!</button>
-    <button id="undo-btn" class="button" onClick="undoStamp()">Undo</button>
+    
     <button id="export-btn" class="button" onClick="exportShapes()">Export</button>
 <div>
     <label for="good" style="color:white;">Estimation</label>
@@ -62,15 +74,18 @@
   </div>
   <div id="canvas" style="background-color: black;"></div>
   <div id="stamp-panel">
-    <img class="stamp" src="bc.png">
-    <img class="stamp" src="bt.png">
-    <img class="stamp" src="bs.png">
-    <img class="stamp" src="rc.png">
-    <img class="stamp" src="rt.png">
-    <img class="stamp" src="rs.png">
-    <img class="stamp" src="yc.png">
-    <img class="stamp" src="yt.png">
-    <img class="stamp" src="ys.png">
+    <div id="stamps">
+      <img class="stamp" src="bc.png">
+      <img class="stamp" src="bt.png">
+      <img class="stamp" src="bs.png">
+      <img class="stamp" src="rc.png">
+      <img class="stamp" src="rt.png">
+      <img class="stamp" src="rs.png">
+      <img class="stamp" src="yc.png">
+      <img class="stamp" src="yt.png">
+      <img class="stamp" src="ys.png">
+      <button id="undo-btn" class="button" onClick="undoStamp()">Undo</button>     
+    </div> 
     <button id="clear-btn" style="float: right;">Clear Screen</button>
   </div>
 
@@ -81,9 +96,9 @@
   const submitBtn = document.getElementById("submit-btn");
   const showBtn = document.getElementById("show-btn");
   const subjectId = document.getElementById("subject-id");
-  const newCanvas = new Image(996, 650);
+  const newCanvas = new Image(830, 580);
   newCanvas.src = "touchcenter.png";
-  const blankCanvas = new Image(996, 650);
+  const blankCanvas = new Image(830, 580);
   blankCanvas.src = "blankcanvas.png";
 
   const pictureContainer = document.getElementById("picture-container");
@@ -177,6 +192,7 @@
   }
 
   function overlapping(stamp1, stamp2) {
+    return false; // allow overlapping for now
     let { top: top1, left: left1, rect: rect1 } = getStampPosition(stamp1);
     let { top: top2, left: left2, rect: rect2 } = getStampPosition(stamp2);
 
