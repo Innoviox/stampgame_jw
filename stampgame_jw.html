@@ -61,7 +61,7 @@
     <label for="gender" style="color:white;">Gender:</label>
     <input type="text" id="gender">
     <button id="show-btn" class="button">Touch the Center!</button>
-    
+
     <button id="export-btn" class="button" onClick="exportShapes()">Export</button>
 <div>
     <label for="good" style="color:white;">Estimation</label>
@@ -84,8 +84,8 @@
       <img class="stamp" src="yc.png">
       <img class="stamp" src="yt.png">
       <img class="stamp" src="ys.png">
-      <button id="undo-btn" class="button" onClick="undoStamp()">Undo</button>     
-    </div> 
+      <button id="undo-btn" class="button" onClick="undoStamp()">Undo</button>
+    </div>
     <button id="clear-btn" style="float: right;">Clear Screen</button>
   </div>
 
@@ -108,11 +108,11 @@
 
   let shapes = [];
   let crossPosition = null;
+  // generate random number between 1 and 2
+  const randomNum = Math.floor(Math.random() * 2) + 1;
 
   // add click event listener to show random button
   showRandomBtn.addEventListener("click", function() {
-    // generate random number between 1 and 2
-    const randomNum = Math.floor(Math.random() * 2) + 1;
 
     // hide both pictures
     picture1.style.display = "none";
@@ -158,25 +158,37 @@
     const subjectAge = document.getElementById("subject-age").value.trim();
     const subjectGender = document.getElementById("gender").value.trim();
     const estimation = document.getElementById("good").value.trim();
-    
-    const csvHeader = "Subject ID,Subject Age,Gender,Estimation,Shape File Source,Top,Left,CenterTop,CenterLeft\n";
-    
+
+    const csvHeader = "Subject ID,Condition,Subject Age,Gender,Estimation,Shape File Source,Top,Left,CenterTop,CenterLeft\n";
+
     const csvRows = shapes.map(shape => {
-      let row=`"${subjectId}","${subjectAge}","${subjectGender}","${estimation}",`;
+      let row=`"${subjectId}","${randomNum}","${subjectAge}","${subjectGender}","${estimation}",`;
       row += `"${shape.src}","${shape.style.top}","${shape.style.left}",`;
       row += `"${crossPosition ? crossPosition.y : ''}","${crossPosition ? crossPosition.x : ''}"\n`;
       return row;
     }).join("\n");
-    
+
     const csvContent = csvHeader + csvRows;
-    
+
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `shapes-${subjectId}-${subjectAge}-${subjectGender}.csv`;
+    a.download = `shapes-${subjectId}-${subjectAge}-${randomNum}.csv`;
     a.click();
+    saveData(`shapes-${subjectId}-${subjectAge}-${randomNum}.csv`, csvRows);
+
   }
+
+
+  // save data
+  function saveData(name, data){
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', 'write_data_file.php');
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(JSON.stringify({filename: name, filedata: data}));
+    }
+
 
   function moveStamp(event) {
     if (!isDragging) return;
@@ -218,7 +230,7 @@
     if (top > 600 || left > 850 || top < 0 || left < 0) {
       return; // don't add stamp if it's out of bounds
     }
-    
+
     for (let shape of shapes) {
       if (overlapping(activeStamp, shape)) {
         return;
